@@ -1,0 +1,8 @@
+{
+  "name": "aged-scene-0a7a",
+  "compatibility_date": "2026-10-02",
+  "assets": {
+    "directory": ".",
+    "not_found_handling": "single-page-application"
+  }
+}
