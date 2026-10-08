@@ -162,6 +162,21 @@ async function initAuth(){
   const { data: { session } } = await supabaseClient.auth.getSession();
 
   if(session){
+    const { data: staff } = await supabaseClient
+      .from('staff')
+      .select('role, active')
+      .eq('user_id', session.user.id)
+      .maybeSingle();
+
+    window.userRole = staff?.role || 'worker';
+
+    if(window.userRole === 'worker'){
+      ['adminServices','adminStats','adminCash','adminSettings'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el) el.style.display = 'none';
+      });
+    }
+
     show('dashboard');
     return;
   }
