@@ -147,7 +147,150 @@ function globalSearch(){const q=document.getElementById('globalSearch').value.tr
 document.getElementById('globalSearch').addEventListener('keydown',e=>{if(e.key==='Enter')globalSearch()});
 nav();
 const mb=document.getElementById('mobileBar');mb.innerHTML=[['dashboard','⌂','Home'],['agenda','▦','Agenda'],['bookings','◉','Prenotazioni'],['clients','♙','Clienti'],['cash','€','Incassi']].map(x=>`<button onclick="show('${x[0]}')" data-m="${x[0]}"><b>${x[1]}</b><br>${x[2]}</button>`).join('');
-show('dashboard');
+async function initAuth(){
+  const { data: { session } } = await supabaseClient.auth.getSession();
+
+  if(session){
+    show('dashboard');
+    return;
+  }
+
+  const login = document.createElement('div');
+  login.id = 'authGate';
+
+  login.style.cssText = `
+    position:fixed;
+    inset:0;
+    z-index:99999;
+    background:#090909;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    font-family:Arial,sans-serif;
+  `;
+
+  login.innerHTML = `
+    <div style="
+      width:min(420px,100%);
+      background:#111;
+      border:1px solid #b99a5b;
+      border-radius:18px;
+      padding:32px;
+      box-shadow:0 20px 60px rgba(0,0,0,.6);
+      text-align:center;
+    ">
+      <div style="
+        color:#d4af63;
+        font-size:13px;
+        letter-spacing:3px;
+        margin-bottom:12px;
+      ">LAVAGGIO MANIA</div>
+
+      <h2 style="
+        color:#fff;
+        margin:0 0 8px;
+        font-size:26px;
+      ">Accesso Gestionale</h2>
+
+      <p style="
+        color:#aaa;
+        margin:0 0 24px;
+        font-size:14px;
+      ">Area riservata al personale autorizzato</p>
+
+      <input
+        id="authEmail"
+        type="email"
+        value="info@lavaggiomania.it"
+        placeholder="Email"
+        style="
+          width:100%;
+          box-sizing:border-box;
+          padding:14px;
+          margin-bottom:12px;
+          border-radius:10px;
+          border:1px solid #333;
+          background:#191919;
+          color:#fff;
+          font-size:15px;
+        "
+      >
+
+      <button
+        id="authLogin"
+        style="
+          width:100%;
+          padding:14px;
+          border:0;
+          border-radius:10px;
+          background:#d4af63;
+          color:#080808;
+          font-weight:700;
+          font-size:15px;
+          cursor:pointer;
+        "
+      >Invia link di accesso</button>
+
+      <div
+        id="authMessage"
+        style="
+          color:#aaa;
+          font-size:13px;
+          margin-top:16px;
+          min-height:20px;
+        "
+      ></div>
+    </div>
+  `;
+
+  document.body.appendChild(login);
+
+  document.getElementById('authLogin').onclick = async () => {
+    const email = document.getElementById('authEmail').value.trim();
+    const message = document.getElementById('authMessage');
+    const button = document.getElementById('authLogin');
+
+    if(!email){
+      message.textContent = 'Inserisci l’email';
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent = 'Invio in corso...';
+    message.textContent = '';
+
+    const { error } = await supabaseClient.auth.signInWithOtp({
+      email,
+      options:{
+        emailRedirectTo:
+          'https://aged-scene-0a7a.delicate-sun-2ef8.workers.dev/gestionale/'
+      }
+    });
+
+    if(error){
+      message.textContent = error.message;
+      button.disabled = false;
+      button.textContent = 'Invia link di accesso';
+      return;
+    }
+
+    message.textContent =
+      'Controlla la casella email e apri il link ricevuto';
+
+    button.disabled = false;
+    button.textContent = 'Link inviato';
+  };
+
+  supabaseClient.auth.onAuthStateChange((event, session) => {
+    if(session){
+      login.remove();
+      show('dashboard');
+    }
+  });
+}
+
+initAuth();
 </script>
 </body>
 </html>
