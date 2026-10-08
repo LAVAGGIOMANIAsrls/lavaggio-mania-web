@@ -247,40 +247,34 @@ async function initAuth(){
   document.body.appendChild(login);
 
   document.getElementById('authLogin').onclick = async () => {
-    const email = document.getElementById('authEmail').value.trim();
-    const message = document.getElementById('authMessage');
-    const button = document.getElementById('authLogin');
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const message = document.getElementById('authMessage');
+  const button = document.getElementById('authLogin');
 
-    if(!email){
-      message.textContent = 'Inserisci l’email';
-      return;
-    }
+  if(!email || !password){
+    message.textContent = 'Inserisci email e password';
+    return;
+  }
 
-    button.disabled = true;
-    button.textContent = 'Invio in corso...';
-    message.textContent = '';
+  button.disabled = true;
+  button.textContent = 'Accesso in corso...';
+  message.textContent = '';
 
-    const { error } = await supabaseClient.auth.signInWithOtp({
-      email,
-      options:{
-        emailRedirectTo:
-          'https://aged-scene-0a7a.delicate-sun-2ef8.workers.dev/gestionale/'
-      }
-    });
+  const { error } = await supabaseClient.auth.signInWithPassword({
+    email,
+    password
+  });
 
-    if(error){
-      message.textContent = error.message;
-      button.disabled = false;
-      button.textContent = 'Invia link di accesso';
-      return;
-    }
-
-    message.textContent =
-      'Controlla la casella email e apri il link ricevuto';
-
+  if(error){
+    message.textContent = error.message;
     button.disabled = false;
-    button.textContent = 'Link inviato';
-  };
+    button.textContent = 'Accedi';
+    return;
+  }
+
+  message.textContent = 'Accesso effettuato';
+};
 
   supabaseClient.auth.onAuthStateChange((event, session) => {
     if(session){
