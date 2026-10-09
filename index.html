@@ -221,25 +221,58 @@ function openCart(){
 function closeCart(){document.getElementById("drawer").classList.remove("open");}
 
 
+
 async function confirmBooking() {
   const name = document.getElementById("name").value.trim();
   const phone = document.getElementById("phone").value.trim();
   const date = document.getElementById("date").value;
   const time = document.getElementById("time").value;
+  const button = document.querySelector(".confirm");
 
-  if (!name || !phone || !selectedCar || !cart.length || !date || !time) {
-    alert("Completa nome, telefono, auto, servizi, data e orario");
+  if (!name) {
+    closeCart();
+    alert("Inserisci nome e cognome.");
+    document.getElementById("name").focus();
+    return;
+  }
+
+  if (!phone) {
+    closeCart();
+    alert("Inserisci il numero di telefono.");
+    document.getElementById("phone").focus();
+    return;
+  }
+
+  if (!selectedCar) {
+    closeCart();
+    alert("Seleziona la categoria della tua auto.");
+    return;
+  }
+
+  if (!cart.length) {
+    closeCart();
+    alert("Seleziona almeno un servizio.");
+    return;
+  }
+
+  if (!date || !time) {
+    closeCart();
+    alert("Seleziona data e orario.");
     return;
   }
 
   const total = currentTotal();
-  const serviceNames = cart.map(i => services[i][0]);
-  const button = document.querySelector(".confirm");
+  const serviceNames = cart.map(item => services[item.i][0]);
+  const originalLabel = button.textContent;
 
   button.disabled = true;
-  button.textContent = "SALVATAGGIO IN CORSO";
+  button.textContent = "SALVATAGGIO IN CORSO…";
 
   try {
+    if (!supabaseClient) {
+      throw new Error("Connessione al database non disponibile.");
+    }
+
     const { data, error } = await supabaseClient.rpc(
       "create_customer_booking",
       {
@@ -254,30 +287,50 @@ async function confirmBooking() {
     );
 
     if (error) throw error;
+    if (!data) {
+      throw new Error("Il database non ha confermato il salvataggio.");
+    }
 
     const nice = new Date(date + "T12:00:00").toLocaleDateString(
       "it-IT",
       { day: "2-digit", month: "2-digit", year: "numeric" }
     );
 
-    button.style.display = "none";
+    const safeName = name.replace(/[&<>"']/g, ch => ({
+      "&": "&amp;",
+      "<": "&lt;",
+      ">": "&gt;",
+      '"': "&quot;",
+      "'": "&#39;"
+    })[ch]);
 
-    const s = document.getElementById("success");
-    s.style.display = "block";
-    s.innerHTML = `
+    const success = document.getElementById("success");
+    success.innerHTML = `
       <div class="check">✓</div>
       <h2>Prenotazione confermata</h2>
-      <p>${name}<br>${selectedCar} · ${nice} · ${time}<br>Totale €${eur(total)}</p>
-      <p class="notice">La tua richiesta è stata registrata</p>
+      <p>${safeName}<br>
+      ${selectedCar} · ${nice} · ${time}<br>
+      Totale €${eur(total)}</p>
+      <p class="notice">Prenotazione registrata correttamente.</p>
     `;
+
+    success.style.display = "block";
+    button.style.display = "none";
+
   } catch (error) {
     console.error("Errore prenotazione:", error);
-    alert("Prenotazione non salvata. Riprova tra poco");
+    alert(
+      "Prenotazione non riuscita: " +
+      (error.message || "errore sconosciuto")
+    );
   } finally {
     button.disabled = false;
-    button.textContent = "CONFERMA PRENOTAZIONE";
+    if (button.style.display !== "none") {
+      button.textContent = originalLabel;
+    }
   }
 }
+
 
 
 function initDate(){
