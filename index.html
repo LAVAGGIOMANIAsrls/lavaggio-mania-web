@@ -36,6 +36,7 @@ main{padding:15px 15px 120px}.hero{position:relative;min-height:300px;border:1px
 .line{display:flex;justify-content:space-between;gap:15px;padding:10px 0;border-bottom:1px solid #222;font-size:13px}.total{display:flex;justify-content:space-between;font-size:19px;font-weight:950;padding:15px 0}.confirm{margin-top:8px}.success{text-align:center;padding:20px 5px 12px}.success .check{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:#050505;font-size:30px;font-weight:900;margin:0 auto 14px}.notice{color:#aaa;font-size:12px;line-height:1.45}
 @media(max-width:390px){.hero h1{font-size:27px}.carGrid{grid-template-columns:repeat(2,1fr)}.logoWatermark{width:150px;height:150px}}
 </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div class="app">
@@ -51,7 +52,24 @@ main{padding:15px 15px 120px}.hero{position:relative;min-height:300px;border:1px
 <p>Scegli la tua auto, aggiungi tutti i trattamenti che desideri e completa la prenotazione in pochi passaggi</p>
 </section>
 
-<section class="section"><div class="sectionHead"><h2>1 · I tuoi dati</h2><small>Richiesti</small></div><div class="card"><div class="field"><label for="name">Nome e Cognome</label><input id="name" placeholder="Inserisci nome e cognome" autocomplete="name"></div></div></section>
+
+<section class="section">
+  <div class="sectionHead">
+    <h2>1 · I tuoi dati</h2>
+    <small>Richiesti</small>
+  </div>
+  <div class="card">
+    <div class="field">
+      <label for="name">Nome e Cognome</label>
+      <input id="name" placeholder="Inserisci nome e cognome" autocomplete="name" required>
+    </div>
+    <div class="field">
+      <label for="phone">Numero di telefono</label>
+      <input id="phone" type="tel" placeholder="Inserisci il tuo numero" autocomplete="tel" required>
+    </div>
+  </div>
+</section>
+
 
 <section class="section" id="vehicleStep">
 <div class="sectionHead"><h2>2 · Scegli la tua auto</h2><small id="vehicleHint">Tocca una categoria</small></div>
