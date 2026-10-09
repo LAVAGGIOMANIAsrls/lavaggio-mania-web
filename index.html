@@ -220,27 +220,65 @@ function openCart(){
 
 function closeCart(){document.getElementById("drawer").classList.remove("open");}
 
-function confirmBooking(){
-  const name=document.getElementById("name").value.trim();
-  const date=document.getElementById("date").value;
-  const time=document.getElementById("time").value;
 
-  if(!name || !selectedCar || !cart.length || !date || !time){
-    alert("Completa nome, auto, almeno un servizio, data e orario");
+async function confirmBooking() {
+  const name = document.getElementById("name").value.trim();
+  const phone = document.getElementById("phone").value.trim();
+  const date = document.getElementById("date").value;
+  const time = document.getElementById("time").value;
+
+  if (!name || !phone || !selectedCar || !cart.length || !date || !time) {
+    alert("Completa nome, telefono, auto, servizi, data e orario");
     return;
   }
 
-  const nice=new Date(date+"T12:00:00").toLocaleDateString("it-IT",{day:"2-digit",month:"2-digit",year:"numeric"});
-  const total=currentTotal();
+  const total = currentTotal();
+  const serviceNames = cart.map(i => services[i][0]);
+  const button = document.querySelector(".confirm");
 
-  document.querySelector(".confirm").style.display="none";
-  const s=document.getElementById("success");
-  s.style.display="block";
-  s.innerHTML=`<div class="check">✓</div>
-  <h2>Prenotazione pronta</h2>
-  <p>${name}<br>${selectedCar} · ${nice} · ${time}<br>Totale €${eur(total)}</p>
-  <p class="notice">La richiesta è pronta per essere collegata al sistema di prenotazione online</p>`;
+  button.disabled = true;
+  button.textContent = "SALVATAGGIO IN CORSO";
+
+  try {
+    const { data, error } = await supabaseClient.rpc(
+      "create_customer_booking",
+      {
+        p_name: name,
+        p_phone: phone,
+        p_category: selectedCar,
+        p_booking_date: date,
+        p_booking_time: time,
+        p_total: total,
+        p_service_names: serviceNames
+      }
+    );
+
+    if (error) throw error;
+
+    const nice = new Date(date + "T12:00:00").toLocaleDateString(
+      "it-IT",
+      { day: "2-digit", month: "2-digit", year: "numeric" }
+    );
+
+    button.style.display = "none";
+
+    const s = document.getElementById("success");
+    s.style.display = "block";
+    s.innerHTML = `
+      <div class="check">✓</div>
+      <h2>Prenotazione confermata</h2>
+      <p>${name}<br>${selectedCar} · ${nice} · ${time}<br>Totale €${eur(total)}</p>
+      <p class="notice">La tua richiesta è stata registrata</p>
+    `;
+  } catch (error) {
+    console.error("Errore prenotazione:", error);
+    alert("Prenotazione non salvata. Riprova tra poco");
+  } finally {
+    button.disabled = false;
+    button.textContent = "CONFERMA PRENOTAZIONE";
+  }
 }
+
 
 function initDate(){
   const d=document.getElementById("date");
