@@ -37,6 +37,14 @@ main{padding:15px 15px 120px}.hero{position:relative;min-height:300px;border:1px
 @media(max-width:390px){.hero h1{font-size:27px}.carGrid{grid-template-columns:repeat(2,1fr)}.logoWatermark{width:150px;height:150px}}
 </style>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+const SUPABASE_URL = 'https://ysewsofsuygkehciecuo.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_TGr7bEY764fVRYgSbzFrbw_HaZvT0tg';
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_KEY
+);
+</script>
 </head>
 <body>
 <div class="app">
